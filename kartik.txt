@@ -1,0 +1,33 @@
+@Autowired
+       private CustomerRepository customerRepository;
+
+       @RequestMapping(value = "/customers", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+       @ResponseBody
+       public List<Resource<Customer>> showCustomers() {
+
+             List<Customer> customerList = this.customerRepository.findAll();
+             List<Resource<Customer>> customerResources = new ArrayList<Resource<Customer>>();
+
+             for (Customer customer : customerList) {
+                    customerResources.add(getCustomerResource(customer));
+             }
+
+             return customerResources;
+       }
+
+       @RequestMapping(value = "/customer/{id}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+       @ResponseBody
+       public Resource<Customer> getCustomer(@PathVariable(value = "id") String id) {
+
+             Customer customer = customerRepository.findOne(Long.valueOf(id));
+
+             return getCustomerResource(customer);
+
+       }
+       
+       private Resource<Customer> getCustomerResource(Customer customer) {
+             Resource<Customer> resource = new Resource<Customer>(customer);
+              resource.add(ControllerLinkBuilder.linkTo(ControllerLinkBuilder.methodOn(CustomerController.class).getCustomer(customer.getCustomerId())).withSelfRel());
+       
+             return resource;
+       }
